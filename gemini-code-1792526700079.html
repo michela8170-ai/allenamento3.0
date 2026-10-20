@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>La mia scheda di allenamento</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#121417;--card:#1e2229;--ink:#f2f0ec;--mute:#9aa0a8;--line:#2f343d;--acc:#ff6a1f;--accink:#fff;--ok:#22c55e;--rub:#0f1113}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:500 16px/1.4 Barlow,sans-serif;max-width:600px;margin-inline:auto;padding-bottom:90px;min-height:100vh}
+header{background:var(--rub);color:#f2f0ec;padding:20px 16px;border-bottom:2px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+header h1{font:800 28px/1 'Barlow Condensed',sans-serif;text-transform:uppercase}
+header p{font-size:13px;color:var(--mute)}
+.prog-box{background:var(--line);height:8px;border-radius:4px;overflow:hidden;margin-top:8px}
+.prog-bar{height:100%;background:var(--acc);width:0;transition:width .3s}
+main{padding:16px}
+.day h2{font:800 28px 'Barlow Condensed',sans-serif;margin-bottom:4px;text-transform:uppercase}
+.time{color:var(--mute);font-size:14px;margin-bottom:12px}
+.phases{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.phases span{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px}
+.phases b{color:var(--acc)}
+.note{background:var(--card);border-left:4px solid var(--acc);padding:10px;border-radius:6px;margin-bottom:16px;font-size:14px}
+.ex{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.ex.done{opacity:.5}
+.ex.done .nm{text-decoration:line-through}
+.chk{width:44px;height:44px;flex:none;border-radius:50%;border:2px solid var(--line);background:transparent;color:var(--accink);font-size:20px;cursor:pointer;display:grid;place-items:center}
+.done .chk{background:var(--ok);border-color:var(--ok)}
+.pic{width:60px;height:60px;flex:none;border-radius:8px;background:var(--bg);border:1px dashed var(--line);overflow:hidden;cursor:pointer;display:grid;place-items:center;color:var(--mute);font-size:11px}
+.pic img{width:100%;height:100%;object-fit:cover}
+.info{flex:1;min-width:0}
+.nm{font:700 18px/1.2 'Barlow Condensed',sans-serif;text-transform:uppercase}
+.sr{color:var(--acc);font:700 16px 'Barlow Condensed',sans-serif;margin-top:2px}
+nav{position:fixed;bottom:0;left:0;right:0;max-width:600px;margin-inline:auto;background:var(--rub);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:8px;z-index:100}
+nav button{background:var(--card);border:1px solid var(--line);color:var(--ink);padding:10px 0;border-radius:8px;font:700 14px 'Barlow Condensed',sans-serif;cursor:pointer;text-align:center}
+nav button small{display:block;font-size:10px;color:var(--mute);font-weight:400}
+nav button[aria-selected=true]{background:var(--acc);border-color:var(--acc);color:var(--accink)}
+nav button[aria-selected=true] small{color:var(--accink)}
+.tools{display:flex;gap:8px;margin-top:20px}
+.btn{flex:1;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:700 15px 'Barlow Condensed',sans-serif;text-transform:uppercase;cursor:pointer}
+.btn.p{background:var(--acc);border-color:var(--acc);color:var(--accink)}
+</style>
+</head>
+<body>
+<header>
+<div>
+<h1>Allenamento</h1>
+<p id="sub-t">Scheda settimanale</p>
+<div class="prog-box"><div class="prog-bar" id="prog"></div></div>
+</div>
+</header>
+<main id="view"></main>
+<nav id="tabs"></nav>
+<input type="file" id="file" accept="image/*" hidden>
+<script>
+var DEF=[
+{d:"Lun",t:"Gambe e glutei",m:"25–30 min",p:[["Riscaldam.","4 min"],["Allenam.","16 min"]],e:[["Squat a corpo libero","2 × 12"],["Affondi indietro","2 × 8"],["Glute bridge","3 × 15"],["Stacchi rumeni","2 × 12"]]},
+{d:"Mar",t:"Full body",m:"25 min",p:[["Riscaldam.","4 min"],["Circuito","16 min"]],e:[["Squat","12 rip."],["Piegamenti","8 rip."],["Rematore","12 rip."],["Jumping jack","30 sec"]]},
+{d:"Mer",t:"Core e mobilità",m:"20 min",p:[["Core","12 min"],["Mobilità","8 min"]],e:[["Chiusure a libro","2 × 10"],["Plank","3 × 20 sec"],["Crunch","2 × 12"]]},
+{d:"Gio",t:"Braccia e spalle",m:"25 min",p:[["Riscaldam.","4 min"],["Allenam.","18 min"]],e:[["Curl manubri","2 × 12"],["Rematore","3 × 10"],["Shoulder press","2 × 10"],["Alzate laterali","2 × 12"]]},
+{d:"Ven",t:"Glutei e core",m:"25 min",p:[["Riscaldam.","4 min"],["Allenam.","18 min"]],e:[["Glute bridge","3 × 12"],["Squat leggeri","2 × 12"],["Crunch inversi","2 × 10"]]}
+];
+var KEY="scheda-v3",S=JSON.parse(localStorage.getItem(KEY))||DEF,cur=0;
+function save(){localStorage.setItem(KEY,JSON.stringify(S));render()}
+function render(){
+var x=S[cur],v=document.getElementById("view"),t=document.getElementById("tabs");
+let tot=0,done=0;
+S.forEach(d=>d.e.forEach(e=>{tot++;if(e.k)done++}));
+document.getElementById("prog").style.width=(tot?done/tot*100:0)+"%";
+t.innerHTML="";
+S.forEach((d,i)=>{
+let d_done=d.e.filter(e=>e.k).length;
+t.appendChild(h("button",{"aria-selected":i===cur,onclick:()=>{cur=i;render()}},[document.createTextNode(d.d),h("small",{text:d_done+"/"+d.e.length})]));
+});
+v.innerHTML="";
+let w=h("div",{"class":"day"},[
+h("h2",{text:x.t}),
+h("p",{"class":"time",text:x.m})
+]);
+let ph=h("div",{"class":"phases"});
+x.p.forEach(p=>ph.appendChild(h("span",{},[document.createTextNode(p[0]+" "),h("b",{text:p[1]})])));
+w.appendChild(ph);
+if(x.n)w.appendChild(h("p",{"class":"note",text:x.n}));
+x.e.forEach((e,i)=>{
+let row=h("div",{"class":"ex"+(e.k?" done":"")});
+let chk=h("button",{"class":"chk",onclick:()=>{e.k=e.k?0:1;save();if(navigator.vibrate)navigator.vibrate(20);},text:e.k?"✓":""});
+let info=h("div",{"class":"info"},[h("div",{"class":"nm",text:e.n}),h("div",{"class":"sr",text:e.s})]);
+row.appendChild(chk);
+row.appendChild(info);
+w.appendChild(row);
+});
+let tools=h("div",{"class":"tools"},[
+h("button",{"class":"btn p",onclick:()=>{x.e.forEach(e=>e.k=1);save()}},[document.createTextNode("Comporta tutti")]),
+h("button",{"class":"btn",onclick:()=>{x.e.forEach(e=>e.k=0);save()}},[document.createTextNode("Azzera giorno")])
+]);
+w.appendChild(tools);
+v.appendChild(w);
+}
+function h(tag,attrs,kids){let el=document.createElement(tag);for(let k in attrs||{}){if(k==="text")el.textContent=attrs[k];else if(k.slice(0,2)==="on")el[k]=attrs[k];else el.setAttribute(k,attrs[k])}(kids||[]).forEach(c=>c&&el.appendChild(c));return el}
+render();
+</script>
+</body>
+</html>
